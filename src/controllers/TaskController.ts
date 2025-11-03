@@ -57,13 +57,17 @@ export class TaskController {
 
   static deleteTask = async (req: Request, res: Response) => {
     try {
+      // 1. La variable 'req.tasks' contiene el objeto de la tarea a eliminar.
+      //    El ID de la tarea a eliminar ya está en req.tasks._id (o req.tasks.id).
+      const taskIdToDelete = req.tasks.id // Usamos .id que es más estándar en Mongoose/Express
+
       // 2. Eliminar la referencia de la tarea del array del proyecto
-
       req.project.tasks = req.project.tasks.filter(
-        //Y toString para elminarlo, recuerda que hay que convertirlos a string
-        (projectId) => projectId?.toString() !== req.tasks.id.taskId.toString() // Usamos 'projectId' para ser más claros, aunque son ObjectsId
-      ) // 3. Ejecutar las dos operaciones en paralelo
+        // Cambiamos el nombre de la variable a 'taskRef' para ser más claros, ya que contiene la Referencia de Tarea (ObjectID).
+        (taskRef) => taskRef?.toString() !== taskIdToDelete.toString()
+      )
 
+      // 3. Ejecutar las dos operaciones en paralelo (delete y save del proyecto)
       await Promise.allSettled([req.tasks.deleteOne(), req.project.save()])
 
       return res.json({ message: "Tarea Eliminada correctamente" })

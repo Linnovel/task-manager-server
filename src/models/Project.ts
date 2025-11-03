@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document, PopulatedDoc, Types } from "mongoose"
 import { ITask } from "./Task"
+import { IUser } from "./User"
 
 // PopulatedDoc - Traernos referencias de la tarea
 
@@ -7,7 +8,8 @@ export interface IProject extends Document {
   projectName: string
   clientName: string
   description: string
-  tasks: (Types.ObjectId | PopulatedDoc<ITask & Document>)[]
+  tasks: (Types.ObjectId | PopulatedDoc<ITask & Document>)[] //Se usa un array porque un proyecto puede tener muchas tareas
+  manager: PopulatedDoc<IUser & Document>
 }
 
 const ProjectSchema: Schema = new Schema(
@@ -33,6 +35,10 @@ const ProjectSchema: Schema = new Schema(
         ref: "Task",
       },
     ],
+    manager: {
+      type: Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 )

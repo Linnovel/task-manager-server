@@ -5,11 +5,16 @@ import { handleInputError } from "../middleware/validation"
 import { TaskController } from "../controllers/TaskController"
 import { validateProjectExist } from "../middleware/project"
 import { taskBelongsToProject, taskExists } from "../middleware/task"
+import { authenticate } from "../middleware/auth"
 
 const router = Router()
 
+//Protege todas las rutas que esten debajo de este middleware
+router.use(authenticate)
+
 router.post(
   "/",
+
   body("projectName")
     .notEmpty()
     .withMessage("El nombre del proyecto es obligatorio"),

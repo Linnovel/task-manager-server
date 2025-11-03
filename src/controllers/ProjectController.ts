@@ -6,12 +6,13 @@ import Project from "../models/Project"
 export class ProjectController {
   static createProjects = async (req: Request, res: Response) => {
     //Una forma de crear el projecto
-    // const project = new Project(req.body)
-    try {
-      //   await project.save()
+    const project = new Project(req.body)
 
-      //Segunda forma de crearlo mas concreta y rapida
-      await Project.create(req.body)
+    // Asignar un manager al proyecto desde el usuario autenticado
+    project.manager = req.user?.id
+
+    try {
+      await project.save()
       return res.status(201).json({ msg: "Projecto Creado Correctamente" })
     } catch (error) {
       console.log(error)
@@ -21,7 +22,9 @@ export class ProjectController {
 
   static getAllProjects = async (req: Request, res: Response) => {
     try {
-      const projects = await Project.find({})
+      const projects = await Project.find({
+        $or: [{ manager: { $in: req?.user?.id } }],
+      })
       res.json(projects)
     } catch (error) {
       console.log(error)
@@ -37,6 +40,11 @@ export class ProjectController {
       if (!project) {
         return res.status(404).json({ msg: "Ese proyecto no existe" })
       }
+
+      if (project.manager?.toString() !== req.user?.id.toString()) {
+        return res.status(401).json({ msg: "No autorizado" })
+      }
+
       res.json(project)
     } catch (error) {
       console.log(error)
@@ -52,6 +60,13 @@ export class ProjectController {
       if (!project) {
         return res.status(404).json({ msg: "Ese proyecto no existe" })
       }
+
+      if (project.manager?.toString() !== req.user?.id.toString()) {
+        return res
+          .status(401)
+          .json({ msg: "Solo El manager puede actualiar el proyecto" })
+      }
+
       project.clientName = req.body.clientName
       project.projectName = req.body.projectName
       project.description = req.body.description
@@ -91,6 +106,11 @@ export class ProjectController {
       if (!deletedProject) {
         // Si el resultado es null, el ID no existe.
         return res.status(404).json({ msg: "Ese proyecto no existe" })
+      }
+      // Verifica si el usuario autenticado es el manager del proyecto eliminado
+      const project = deletedProject // Ya tenemos el proyecto eliminado
+      if (project.manager?.toString() !== req.user?.id.toString()) {
+        return res.status(401).json({ msg: "No autorizado" })
       }
 
       // Si llega aquí, la eliminación ya se realizó con éxito.
