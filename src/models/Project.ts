@@ -10,6 +10,7 @@ export interface IProject extends Document {
   description: string
   tasks: (Types.ObjectId | PopulatedDoc<ITask & Document>)[] //Se usa un array porque un proyecto puede tener muchas tareas
   manager: PopulatedDoc<IUser & Document>
+  team: PopulatedDoc<IUser & Document>[] // Un proyecto puede tener muchos usuarios en el equipo
 }
 
 const ProjectSchema: Schema = new Schema(
@@ -39,6 +40,12 @@ const ProjectSchema: Schema = new Schema(
       type: Types.ObjectId,
       ref: "User",
     },
+    team: [
+      {
+        type: Types.ObjectId,
+        ref: "User", // Donde se referencia los datos relaciones, los usuarios del equipo
+      },
+    ],
   },
   { timestamps: true }
 )

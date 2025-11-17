@@ -6,6 +6,7 @@ import { TaskController } from "../controllers/TaskController"
 import { validateProjectExist } from "../middleware/project"
 import { taskBelongsToProject, taskExists } from "../middleware/task"
 import { authenticate } from "../middleware/auth"
+import { TeamMemberController } from "../controllers/TeamController"
 
 const router = Router()
 
@@ -113,6 +114,35 @@ router.post(
   body("status").notEmpty().withMessage("El Estatus es obligatorio"),
   handleInputError,
   TaskController.updateStatusTask
+)
+
+/*  
+Routes para los TEAMS. Manegar los usuarios que pertenecen a un proyecto
+*/
+
+router.post(
+  "/:projectId/team/find",
+  body("email").isEmail().withMessage("Email no valido"),
+  handleInputError,
+  TeamMemberController.findMemberByEmail
+)
+
+router.post(
+  "/:projectId/team",
+
+  body("userId").isMongoId().withMessage("Id de usuario no valido"),
+  handleInputError,
+  TeamMemberController.addTeamMemberById
+)
+
+router.get("/:projectId/team", TeamMemberController.getProjectTeam)
+
+router.delete(
+  "/:projectId/team",
+
+  body("userId").isMongoId().withMessage("Id de usuario no valido"),
+  handleInputError,
+  TeamMemberController.deleteMemberById
 )
 
 export default router
