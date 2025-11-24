@@ -4,7 +4,11 @@ import { ProjectController } from "../controllers/ProjectController"
 import { handleInputError } from "../middleware/validation"
 import { TaskController } from "../controllers/TaskController"
 import { validateProjectExist } from "../middleware/project"
-import { taskBelongsToProject, taskExists } from "../middleware/task"
+import {
+  hasAuthoration,
+  taskBelongsToProject,
+  taskExists,
+} from "../middleware/task"
 import { authenticate } from "../middleware/auth"
 import { TeamMemberController } from "../controllers/TeamController"
 
@@ -66,6 +70,7 @@ router.param("projectId", validateProjectExist)
 //Creacion de una tarea
 router.post(
   "/:projectId/tasks",
+  hasAuthoration,
   body("name").notEmpty().withMessage("El name de la tarea es obligatorio"),
   body("description")
     .notEmpty()
@@ -91,6 +96,7 @@ router.get(
 
 router.put(
   "/:projectId/tasks/:taskId",
+  hasAuthoration,
   param("taskId").isMongoId().withMessage("Id no Valido"),
   body("name").notEmpty().withMessage("El name de la tarea es obligatorio"),
   body("description")
@@ -103,6 +109,7 @@ router.put(
 
 router.delete(
   "/:projectId/tasks/:taskId",
+  hasAuthoration,
   param("taskId").isMongoId().withMessage("Id no Valido"),
   handleInputError,
   TaskController.deleteTask
@@ -120,27 +127,29 @@ router.post(
 Routes para los TEAMS. Manegar los usuarios que pertenecen a un proyecto
 */
 
+//Buscar un miembro del equipo por su email
 router.post(
   "/:projectId/team/find",
   body("email").isEmail().withMessage("Email no valido"),
   handleInputError,
   TeamMemberController.findMemberByEmail
 )
-
+//Agregar un miembro al equipo del proyecto
 router.post(
   "/:projectId/team",
-
-  body("userId").isMongoId().withMessage("Id de usuario no valido"),
+  body("id").isMongoId().withMessage("Id de usuario no valido"),
   handleInputError,
   TeamMemberController.addTeamMemberById
 )
 
+//Obtener el equipo de un proyecto
 router.get("/:projectId/team", TeamMemberController.getProjectTeam)
 
+//Eliminar un miembro del equipo del proyecto
 router.delete(
-  "/:projectId/team",
+  "/:projectId/team/:userId",
 
-  body("userId").isMongoId().withMessage("Id de usuario no valido"),
+  param("userId").isMongoId().withMessage("Id de usuario no valido"),
   handleInputError,
   TeamMemberController.deleteMemberById
 )

@@ -23,7 +23,10 @@ export class ProjectController {
   static getAllProjects = async (req: Request, res: Response) => {
     try {
       const projects = await Project.find({
-        $or: [{ manager: { $in: req?.user?.id } }],
+        $or: [
+          { manager: { $in: req?.user?.id } },
+          { team: { $in: req?.user?.id } },
+        ],
       })
       res.json(projects)
     } catch (error) {
@@ -41,7 +44,10 @@ export class ProjectController {
         return res.status(404).json({ msg: "Ese proyecto no existe" })
       }
 
-      if (project.manager?.toString() !== req.user?.id.toString()) {
+      if (
+        project.manager?.toString() !== req.user?.id.toString() &&
+        !project.team.includes(req?.user?.id)
+      ) {
         return res.status(401).json({ msg: "No autorizado" })
       }
 

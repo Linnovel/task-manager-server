@@ -20,10 +20,10 @@ export class TeamMemberController {
   }
 
   static addTeamMemberById = async (req: Request, res: Response) => {
-    const { userId } = req.body
+    const { id } = req.body
 
     // findById expects the id string (not an object)
-    const user = await User.findById(userId).select("id")
+    const user = await User.findById(id).select("id")
 
     if (!user) {
       const error = new Error("Usuario no encontrado")
@@ -43,7 +43,7 @@ export class TeamMemberController {
   }
 
   static deleteMemberById = async (req: Request, res: Response) => {
-    const { userId } = req.body
+    const { userId } = req.params
 
     if (
       !req.project.team.some((team) => team?.toString() === userId.toString())
